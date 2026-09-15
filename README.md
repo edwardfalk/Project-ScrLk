@@ -9,7 +9,7 @@ The AI-assistant Happy Mac lives in a Macintosh Classic II from 1991. You talk t
 - **Talk to him through the phone.** A Swedish Ericofon (the "cobra phone") is the microphone and speaker. Say "hey jarvis" into the handset to wake him, and he answers through the handset and in writing on the screen, in Swedish or English, whichever you speak. Teaching him to answer to "hey mac" is on the list.
 - **Real CRT, real pixels.** The original 9-inch monochrome tube shows 512×342 pixels at 60 Hz. Every pixel is either black or white: no grey, no antialiasing.
 - **An office companion.** Ask him where to eat lunch, what the weather will do, or what's in the news. [More below.](#talking-to-happy-mac)
-- **A little Mac of its own.** A System 6/7-style desktop with windows, icons, a calculator, notepad and terminal.
+- **A little Mac of its own.** A System 6/7-style desktop with windows, icons, a calculator, notepad and terminal, running on Linux underneath. [More below.](#the-os)
 - **Games.** Zork with Happy Mac as your guide, imagining every room in a thought bubble. Doom in pure black and white. And Bonk!, a two-player brawler. [More below.](#games)
 - **Original keyboard.** A 1990 Apple Extended Keyboard, still speaking its native Apple Desktop Bus.
 
@@ -180,21 +180,59 @@ The Apple Extended Keyboard speaks Apple Desktop Bus (ADB). An Arduino Uno R3 si
 | Mechanical relay | Protects the sound card from ring voltage | |
 | Cables and connectors | | 300 kr |
 
-## Software
+## The OS
 
-- **OS:** Raspberry Pi OS Lite (64-bit), with the labwc Wayland compositor and Chromium in kiosk mode.
-- **Happy Mac UI:** a React web app that imitates Mac System 6/7 in strict 1-bit. It uses bitmap fonts, no transparency, and images dithered on the server.
-- **Backend:** a Python FastAPI service for system status, games, image dithering and health checks.
+Happy Mac's "operating system" has two halves. What you see is a Mac desktop built as a web app. Underneath it is an ordinary Linux system, set up so that nobody ever sees it.
+
+### The desktop
+
+It looks and behaves like System 6/7:
+
+- **Menu bar:** the Apple, File, Edit and Special menus, with a clock in the corner.
+- **Icons:** Macintosh HD, Floppy and Trash, next to icons for the games and apps.
+- **Windows:** you can drag them, minimize them and switch between them.
+- **Sticky notes:** you can stick them on the desktop and cut, copy or duplicate them.
+- **Shortcuts:** ⌘K opens a command palette, ⌘N opens a new notepad and ⌘W closes the front window.
+
+The apps are a Calculator, a Notepad, a Messages window, a web browser that forces pages into black and white, and a Terminal. The Terminal is a real Linux shell in a 1-bit window. The Settings control panel holds the font choices and Doom's launch options.
+
+A few small widgets live on the desk:
+
+- **Workstation** shows the load on each CPU core (see [Things that went wrong](#things-that-went-wrong) for why).
+- **News Wire** runs the latest headlines.
+- **Lunchtips** shows a rotating restaurant example, to nudge people into asking Happy Mac about lunch.
+- **Audio Health** shows whether the handset microphone is actually hearing anything.
+
+### How the desktop is built
+
+The desktop is a React app running full screen in Chromium. Everything on it (windows, menus, desktop icons, widgets and dialogs) is described as data in a set of **blueprints**. A window's blueprint says what it's called, whether there can be one or several, and which commands open and close it. A small runtime reads the blueprints and builds the desktop from them, so adding an app means writing its contents and one blueprint entry. Menus, keyboard shortcuts, the command palette and the desktop icons all trigger the same named commands, so "open Zork" works the same way everywhere.
+
+Keeping every pixel black or white took real work, because browsers produce grey in a dozen quiet ways:
+
+- **Widgets:** the controls come from a library of more than 30 Mac-style widgets (buttons, windows, menus, scroll bars, alerts), each built so it can never produce a grey pixel.
+- **Banned styles:** transparency, semi-transparent colors and rounded corners (which get smoothed edges) are not allowed. Curves are drawn as pixel-exact shapes, and disabled buttons use dither patterns instead of fading out.
+- **Automatic checks:** lint rules, a check whenever code is written, and a reviewer afterwards all enforce this, because each catches different mistakes. A script also captures the real screen output and checks it for grey.
+- **Fonts:** text uses the original Mac bitmap fonts (Chicago, Geneva, Monaco). They are converted into a format the canvas can draw pixel by pixel, and into web fonts for text fields, so no letter is ever smoothed.
+
+### Underneath
+
+- **Base system:** Raspberry Pi OS Lite (64-bit), without the full desktop install.
+- **Startup:** LightDM logs in and starts labwc, a small Wayland compositor. labwc launches Chromium in kiosk mode, pointed at the desktop.
+- **Web server:** Caddy serves the desktop and forwards API calls to the backend.
+- **Backend:** a Python FastAPI service, run by systemd. It handles the games, image dithering, system status, messaging and the wake word.
 - **Voice:** the Google Gemini Live API, with a system prompt that gives Happy Mac his personality.
-- **Wake word:** [openWakeWord](https://github.com/dscripka/openWakeWord), running locally on the Pi.
-- **Doom:** a 1-bit monochrome fork of [Chocolate Doom](https://github.com/chocolate-doom/chocolate-doom).
-- **Provisioning:** Ansible sets up the whole Pi from a fresh SD card.
+- **Wake word:** [openWakeWord](https://github.com/dscripka/openWakeWord), running locally on the Pi. PipeWire routes audio between the handset, the Bluetooth speaker and the wake-word listener.
+- **No smoothed text anywhere:** font smoothing is switched off for the whole system, so even native Linux programs render in 1 bit.
+- **Doom:** a 1-bit fork of [Chocolate Doom](https://github.com/chocolate-doom/chocolate-doom) that runs as a native Wayland program. Chromium steps aside while it has the screen.
+- **Health checks:** systemd timers regularly check the display chain (kernel graphics, compositor and Chromium) and the CPU load. They also back up Happy Mac's memories every day.
+- **Remote access:** a Cloudflare Tunnel makes the phone handset reachable without opening any ports.
+- **Setup:** Ansible builds the whole Pi from a fresh SD card.
 
 Much of the software was written with AI coding assistants, mostly Claude Code. The hardware work still needed hands, a multimeter and an oscilloscope.
 
 ## Things that went wrong
 
-- **The capacitors that weren't.** A smell, a flickering picture, long black-screen periods and sudden power cuts all pointed at dying electrolytic capacitors, the classic compact-Mac failure. It turned out to be a runaway render loop pinning one CPU core at 100%. Fixing the bug made every symptom go away. Linux's average CPU figure had hidden it (one core at 100% and four at 20% read as 40%), so the UI now shows per-core load.
+- **The capacitors that weren't.** A smell, a flickering picture, long black-screen periods and sudden power cuts all pointed at dying electrolytic capacitors, the classic compact-Mac failure. It turned out to be a runaway render loop pinning one CPU core at 100%. Fixing the bug made every symptom go away. Linux's average CPU figure had hidden it (one core at 100% and the other three at 20% average out to 40%), so the UI now shows per-core load.
 - **Audio is harder than video.** Getting the right fonts took weeks, but stabilizing the audio chain took longer. Competing audio drivers, a carbon microphone, and a USB sound card that can be pulled out mid-demo all made trouble. At one point the wake-word service believed it was listening to a microphone that was delivering near-silence.
 - **Cloud APIs change without asking.** Gemini's behavior changed with no visible version bump. Only tests of the running system noticed.
 - **Measure first, connect later.** A mistake on the 12 V rail can kill a Pi 5 instantly. We learned that the hard way.
