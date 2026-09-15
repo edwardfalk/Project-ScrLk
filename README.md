@@ -191,7 +191,7 @@ Felix also built a ring generator (25 Hz, about 70 V AC) so the phone could ring
 
 The Apple Extended Keyboard speaks Apple Desktop Bus (ADB). An Arduino Uno R3 sits in between and translates ADB to USB. The ADB data line goes to GPIO 8, pulled up to 5 V through a 1 kΩ resistor, and the ATmega328P reads it with microsecond timing.
 
-A stock Uno can't pretend to be a keyboard: its USB side is a separate ATmega16U2 that only knows how to be a serial port. So the 16U2 was reflashed with Atmel FLIP to enumerate as a USB keyboard, while the 328P does the ADB work and maps 1990 key codes to the ones Linux expects.
+Felix built this bridge. A stock Uno can't pretend to be a keyboard: its USB side is a separate ATmega16U2 chip that only knows how to be a serial port. So that chip was reflashed to show up as a USB keyboard, while the 328P does the ADB work.
 <!-- TODO: name and link the ADB-to-USB firmware project this is based on. -->
 
 ### Parts
