@@ -102,6 +102,13 @@ flowchart LR
 > [!WARNING]
 > A CRT holds around 15 kV on its anode, and the analog board's capacitors can stay charged long after the plug is pulled. Don't open a compact Mac unless you know how to discharge the tube safely. The steps we followed are in section 4.1 of the thesis.
 
+<p align="center">
+  <img src="images/flyback-transformer.jpg" alt="The flyback transformer on the analog board, with a yellow DANGER HIGH VOLTAGE label" width="48%">
+  <img src="images/crt-tube.jpg" alt="The 9-inch CRT inside the case, with its Clinton Taiwan Corp label" width="48%">
+</p>
+
+*Left: the flyback transformer on the analog board, which makes the tube's high voltage. Right: the 9-inch CRT, made by Clinton in Taiwan.*
+
 ### Driving the CRT from a Raspberry Pi 5
 
 The Pi 5 has no analog video output. Instead it uses DPI (Display Parallel Interface), which puts raw pixel data and sync signals straight onto the GPIO pins. A device-tree overlay describes the Mac's timing to the kernel's KMS driver. The overlay and a reference `config.txt` are public in [macintosh-timings](https://github.com/edwardfalk/macintosh-timings).
@@ -129,6 +136,13 @@ Every signal was checked on an oscilloscope before the kernel driver was allowed
 
 The original logic board talks to the analog board through a 14-position Molex connector. The Pi's 3.3 V GPIO goes through a bidirectional level shifter to meet the analog board's 5 V TTL levels, and a DC-DC converter powers the Pi from the 12 V rail.
 
+<p align="center">
+  <img src="images/interface-board.jpg" alt="The interface board: a red GPIO extension board on perfboard, with a blue DC-DC converter module in a black 3D-printed holder" width="48%">
+  <img src="images/level-shifter.jpg" alt="Side view of the interface board, showing a small blue 4-channel level shifter under the converter" width="48%">
+</p>
+
+*The interface board. A GPIO extension board takes the Pi's ribbon cable, and the 12 V to 5 V converter (an LM2596 module) sits in a 3D-printed holder. Underneath it, a 4-channel level shifter translates between 3.3 V and 5 V.*
+
 | Pin | Signal | Direction | Notes |
 | --- | --- | --- | --- |
 | 1 | +12 V | from analog board | Feeds the DC-DC converter |
@@ -148,9 +162,22 @@ The original logic board talks to the analog board through a 14-position Molex c
 
 This pinout started from public schematics for the Macintosh family and was confirmed by measuring our own board. **Measure yours before connecting anything.** The pins sit close together, and a short between pin 1 (+12 V) and pin 8 (video) would kill the Pi's GPIO instantly.
 
+<p align="center">
+  <img src="images/terminal-blocks.jpg" alt="Coloured wires from the analog board joined to the interface board's wires in white screw terminal blocks" width="60%">
+</p>
+
+*Inside the case, screw terminals join the wires from the analog board to the interface board.*
+
 ### The Ericofon
 
 The Ericofon has a carbon microphone, which needs a steady DC bias current to work, and a dynamic speaker element. A standard USB sound card was modified with a bias resistor and a capacitor-coupled microphone input, and its output drives the Ericofon's speaker.
+
+<p align="center">
+  <img src="images/ericofon-base.jpg" alt="The Ericofon opened up, showing the gears and contact springs of the dial mechanism in its base" width="48%">
+  <img src="images/ericofon-usb-sound-card.jpg" alt="A blue 3D SOUND USB sound card with the Ericofon's coiled cord wired straight into it" width="48%">
+</p>
+
+*Left: the Ericofon opened up, with its dial mechanism in the base. Right: the phone's coiled cord goes straight into a cheap USB sound card.*
 
 There was almost nothing about the Ericofon's internals online. The circuit documentation came from binders of 1970s and 1980s drawings at Radiomuseet in Gothenburg.
 
@@ -171,8 +198,9 @@ The Apple Extended Keyboard speaks Apple Desktop Bus (ADB). An Arduino Uno R3 si
 | Macintosh Classic | CRT and analog board | secondhand |
 | Ericofon | Microphone, speaker, hook switch | secondhand |
 | USB sound card | Audio in and out | 150 kr |
-| Level shifter, 3.3 V / 5 V | GPIO to analog board | 100 kr |
-| DC-DC converter, 12 V to 5 V | Powers the Pi | 100 kr |
+| GPIO extension board + perfboard | Interface board | |
+| Level shifter, 4-channel, 3.3 V / 5 V | GPIO to analog board | 100 kr |
+| DC-DC converter, 12 V to 5 V (LM2596 module) | Powers the Pi | 100 kr |
 | Arduino Uno R3 | ADB-to-USB bridge | 250 kr |
 | Apple Extended Keyboard | Input | secondhand |
 | 1 kΩ resistor | ADB data pull-up | < 10 kr |
