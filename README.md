@@ -39,7 +39,7 @@ From there, people find the rest:
 - He remembers your name and the things you care about between conversations.
 - He has his own email address, subscribed to tech newsletters, so he always has the latest tech news to talk about. He also knows the weather and the time, and can look up anything else on the web.
 - For deeper questions he can search Gemini Notebooks (formerly NotebookLM). That runs in the background: he answers right away and weaves in what he finds when the results arrive.
-- He can look at live network traffic from the EQ200L, a passive network tap that is Felix's own degree project, and tell you what's on the wire. He can only watch, never interfere.
+- He can look at live network traffic from the EQ200L, a passive network tap that is Felix's own degree project, and tell you what's on the wire. He can only watch, never interfere. At the degree presentation he was asked for the tap's latest data, reported it offline, and Felix confirmed from his laptop that it was.
 - Ask him how he's feeling and you get his CPU temperature and memory use.
 - Say "louder" or "quieter" and he changes his volume. He can also move his voice from the handset to a Bluetooth speaker, so a whole room can listen.
 - You can interrupt him. The microphone stays open while he talks, and if you keep speaking over him he stops mid-sentence and listens. The tricky part was telling your voice apart from his own voice leaking from the earpiece into the handset microphone. The threshold was measured on the real phone.
