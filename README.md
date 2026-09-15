@@ -6,11 +6,11 @@ The AI-assistant Happy Mac lives in a Macintosh Classic II from 1991. You talk t
 
 ## What it does
 
-- **Pick up the phone and talk.** A Swedish Ericofon (the "cobra phone") is the microphone and speaker. Happy Mac answers through the handset and in writing on the screen.
-- **Say "hey jarvis" to wake him.** A local wake-word model listens while the screensaver runs. Teaching it "hey mac" instead is on the list.
+- **Talk to him through the phone.** A Swedish Ericofon (the "cobra phone") is the microphone and speaker. Say "hey jarvis" into the handset to wake him, and he answers through the handset and in writing on the screen, in Swedish or English, whichever you speak. Teaching him to answer to "hey mac" is on the list.
 - **Real CRT, real pixels.** The original 9-inch monochrome tube shows 512×342 pixels at 60 Hz. Every pixel is either black or white: no grey, no antialiasing.
+- **An office companion.** Ask him where to eat lunch, what the weather will do, or what's in the news. [More below.](#talking-to-happy-mac)
 - **A little Mac of its own.** A System 6/7-style desktop with windows, icons, a calculator, notepad and terminal.
-- **Games.** Doom in 1-bit monochrome with a dozen dithering styles to pick from. And a Zork remake where Happy Mac narrates and draws every scene live, dithered down to black and white.
+- **Games.** Zork with Happy Mac as your guide, imagining every room in a thought bubble. Doom in pure black and white. And Bonk!, a two-player brawler. [More below.](#games)
 - **Original keyboard.** A 1990 Apple Extended Keyboard, still speaking its native Apple Desktop Bus.
 
 ## Origin
@@ -26,6 +26,49 @@ During the first internship in autumn 2025, my classmate [Felix Da Silva Gunnars
 ![The first prototype showing a 404 error on the monochrome CRT](images/prototype-404.jpg)
 
 The prototype had grown into something that combined analog electronics from four decades with cloud AI. It deserved to be done properly, so I made it my degree project in spring 2026. The goal was a stable machine that boots straight into Happy Mac and survives a whole demo. The thesis (in Swedish) is here: [Examensarbete-Projekt-ScrLk.pdf](Examensarbete-Projekt-ScrLk.pdf).
+
+## Talking to Happy Mac
+
+Happy Mac lives at the EQ2 office. The idea is that people chat with him about simple, everyday things, and discover along the way that there's a lot more he can do.
+
+Lunch is the way in. There's a lunch menu on the desktop with today's menus from restaurants near the office, but it's really there to get people to ask Happy Mac instead. Ask him where to eat and he suggests two or three places. He weighs the weather (somewhere closer on a rainy day), vegetarian needs, and what you liked last time. He also knows which restaurants just opened in town ("Has anyone tried it yet?"). Tell him how a place was, and he remembers your verdict.
+
+From there, people find the rest:
+
+- He speaks Swedish or English, matching whoever is talking to him.
+- He remembers your name and the things you care about between conversations.
+- He has his own email address, subscribed to tech newsletters, so he always has the latest tech news to talk about. He also knows the weather and the time, and can look up anything else on the web.
+- For deeper questions he can search Gemini Notebooks (formerly NotebookLM). That runs in the background: he answers right away and weaves in what he finds when the results arrive.
+- He can look at live network traffic from the EQ200L, a passive network tap that is Felix's own degree project, and tell you what's on the wire. He can only watch, never interfere.
+- Ask him how he's feeling and you get his CPU temperature and memory use.
+- Say "louder" or "quieter" and he changes his volume. He can also move his voice from the handset to a Bluetooth speaker, so a whole room can listen.
+- He opens and closes apps and starts games. Before he reboots himself, he asks you to confirm out loud.
+- Ask him to pass a note to Edward and it arrives on Telegram.
+- He isn't stuck on the desk. He answers email and Telegram messages with the same personality, and there's a phone version of the handset for talking to him from anywhere.
+
+His face is alive too: he blinks when you click on him, fidgets when idle, and shakes when he's thinking hard.
+
+I keep adding new things for him to do.
+
+## Games
+
+### Zork, with Happy Mac as your guide
+
+Zork I is the classic 1980 text adventure: *"You are standing in an open field west of a white house, with a boarded front door."* Here it runs as a from-scratch remake, and Happy Mac plays it with you. Tell him out loud what you want to do: "open the mailbox", "go north", "attack the troll with the sword". He sends the commands to the game and retells what happens in his own words. You can also type commands on the keyboard, the old-fashioned way.
+
+The best part is that he imagines where you are. The first time you walk into a room, a thought bubble pops up beside Happy Mac's face, with a trail of little circles leading back to him, and he might say something like "I can almost picture it…". While he thinks, the bubble reads DREAMING…. Some seconds later the scene appears inside it: a small 128×128-pixel picture, painted by Google's image model from a description Happy Mac writes of the room. It is then dithered to pure black and white with Atkinson dithering, the method Bill Atkinson came up with at Apple for the original Macintosh. He never mentions generating or loading anything; he is just imagining. The photo at the top of this page shows it: that's the white house in his thought bubble.
+
+The pictures belong to the places. Walk back into a room and he remembers what it looked like. But if something visibly changes it, like lighting the lamp, opening the grating or killing the troll, he imagines the room again. Start a new game and every room gets new art.
+
+### Doom in 1 bit
+
+Doom on a screen that can only show black or white. It runs on a 1-bit fork of Chocolate Doom (a source port that stays faithful to the 1993 original), and the fork turns every frame into pure black and white on the fly. It knows more than twenty ways to do that: classic Floyd-Steinberg and Atkinson, ordered Bayer patterns, blue noise, and effects that fake an old tube, like "phosphor trail" and "tube glow". Press M mid-game to switch to the next one, and a small badge shows which is active. The menus were redrawn with a plain bitmap font on a black panel so they stay readable on the CRT.
+
+Ask Happy Mac whether he can play Doom and he answers "I thought you'd never ask!" and starts it. The Mac desktop steps aside while Doom has the whole screen, and comes back when you quit.
+
+### Bonk!
+
+A two-player brawler I made for the Mac desktop. Both players share the keyboard (WASD or the arrow keys and Space against IJKL), or player two grabs a gamepad. Jump between platforms, hold your bonk button to charge, and let go to dash. When you collide, whoever is moving faster stuns the other and sends them flying. Knock your opponent off the screen to score; first to five wins.
 
 ## How it works
 
@@ -61,7 +104,7 @@ flowchart LR
 
 ### Driving the CRT from a Raspberry Pi 5
 
-The Pi 5 has no analog video output. Instead it uses DPI (Display Parallel Interface), which puts raw pixel data and sync signals straight onto the GPIO pins. A device-tree overlay describes the Mac's timing to the kernel's KMS driver:
+The Pi 5 has no analog video output. Instead it uses DPI (Display Parallel Interface), which puts raw pixel data and sync signals straight onto the GPIO pins. A device-tree overlay describes the Mac's timing to the kernel's KMS driver. The overlay and a reference `config.txt` are public in [macintosh-timings](https://github.com/edwardfalk/macintosh-timings).
 
 | | Horizontal | Vertical |
 | --- | --- | --- |
@@ -111,7 +154,7 @@ The Ericofon has a carbon microphone, which needs a steady DC bias current to wo
 
 There was almost nothing about the Ericofon's internals online. The circuit documentation came from binders of 1970s and 1980s drawings at Radiomuseet in Gothenburg.
 
-Felix also built a ring generator (25 Hz, about 70 V AC) so the phone can actually ring. A mechanical relay keeps that voltage away from the sound card.
+Felix also built a ring generator (25 Hz, about 70 V AC) so the phone could ring, with a mechanical relay to keep that voltage away from the sound card. It isn't part of the working system yet.
 
 ### The keyboard
 
@@ -147,7 +190,7 @@ The Apple Extended Keyboard speaks Apple Desktop Bus (ADB). An Arduino Uno R3 si
 - **Doom:** a 1-bit monochrome fork of [Chocolate Doom](https://github.com/chocolate-doom/chocolate-doom).
 - **Provisioning:** Ansible sets up the whole Pi from a fresh SD card.
 
-Much of the software was written with Claude Code. The hardware work still needed hands, a multimeter and an oscilloscope.
+Much of the software was written with AI coding assistants, mostly Claude Code. The hardware work still needed hands, a multimeter and an oscilloscope.
 
 ## Things that went wrong
 
@@ -162,18 +205,20 @@ Much of the software was written with Claude Code. The hardware work still neede
 - The sound card can give an unpleasantly sharp shock when touched, and audio stops when it happens.
 - Galvanic isolation on the audio path, to keep noise from the digital side out of the handset.
 - An I2S DAC instead of the USB sound card, for lower latency.
-- A custom interface PCB instead of modules and jumper wires, to remove the risk of shorts.
+- A custom interface PCB instead of modules and jumper wires, to remove the risk of shorts. Felix started a Raspberry Pi HAT for this in KiCad during the prototype.
 - A wake word trained on "hey mac", and eventually on Swedish pronunciation.
+- Answer by picking up the phone. The Ericofon has a hook button underneath; reading it would let people lift the handset to talk, without saying a wake word.
+- Let Happy Mac ring. With the ring generator working, the phone could ring at 11:45, and whoever picks up gets asked where they want to eat.
 
 ## Code
 
-The source code isn't published yet. It was built for a specific installation and needs cleaning up before it can go public. The display timing above is the most reusable part, and the plan is to publish that first.
+The source code isn't published yet. It was built for a specific installation and needs cleaning up before it can go public. The most reusable part, the display overlay, is already public in [macintosh-timings](https://github.com/edwardfalk/macintosh-timings).
 
 ## Credits and inspiration
 
 - Johannes at EQ2, for the two Macs, the phone and the idea.
-- [Felix Da Silva Gunnarsson](https://github.com/gunnarsson901), for the prototype chassis work, the pinout measurements and the ring generator.
+- [Felix Da Silva Gunnarsson](https://github.com/gunnarsson901), for the prototype chassis work, the pinout measurements and the ring generator. His [ScrLk repo](https://github.com/gunnarsson901/ScrLk) has the prototype-era work from autumn 2025.
 - Susan Kare, whose Happy Mac icon gave the AI its name and face.
-- Radiomuseet in Gothenburg, for the Ericofon drawings.
+- [Radiomuseet in Gothenburg](https://radiomuseet.se/info/panoramor/aktuell/fartygsradio.html), for the Ericofon drawings.
 - Bob Paradiso's Macintosh Classic II schematics, and the [bitsavers.org](http://bitsavers.org) archive.
 - Projects that showed a new computer in an old case can work: Frank Chiarulli's "Building the Rcade", Duncan Hall's restomod Macintosh SE, [likeablob/macmini](https://github.com/likeablob/macmini) and [sakofchit/system.css](https://github.com/sakofchit/system.css).
