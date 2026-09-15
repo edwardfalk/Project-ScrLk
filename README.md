@@ -42,6 +42,8 @@ From there, people find the rest:
 - He can look at live network traffic from the EQ200L, a passive network tap that is Felix's own degree project, and tell you what's on the wire. He can only watch, never interfere.
 - Ask him how he's feeling and you get his CPU temperature and memory use.
 - Say "louder" or "quieter" and he changes his volume. He can also move his voice from the handset to a Bluetooth speaker, so a whole room can listen.
+- You can interrupt him. The microphone stays open while he talks, and if you keep speaking over him he stops mid-sentence and listens. The tricky part was telling your voice apart from his own voice leaking from the earpiece into the handset microphone. The threshold was measured on the real phone.
+- His voice has a "Retro Voice" setting that crushes it to 8-bit samples at about 12 kHz, like an old Mac talking. It sounds right, but on the Ericofon, whose earpiece is already narrow, it costs intelligibility, so it's off by default.
 - He opens and closes apps and starts games. Before he reboots himself, he asks you to confirm out loud.
 - Ask him to pass a note to Edward and it arrives on Telegram.
 - He isn't stuck on the desk. He answers email and Telegram messages with the same personality, and there's a phone version of the handset for talking to him from anywhere.
@@ -181,11 +183,15 @@ The Ericofon has a carbon microphone, which needs a steady DC bias current to wo
 
 There was almost nothing about the Ericofon's internals online. The circuit documentation came from binders of 1970s and 1980s drawings at Radiomuseet in Gothenburg.
 
+The sound card had a surprise of its own. The C-Media chip in these cheap dongles has a hardware sidetone: it routes the microphone straight to the output, inside the chip, at +23.8 dB, and it's on by default. So the handset played back whatever the microphone heard, even when the computer was silent, and could squeal if the speaker got close to the mic. Linux never sees that path, so no software could explain it. The mute is now applied on every deploy, and comes back if the dongle is swapped.
+
 Felix also built a ring generator (25 Hz, about 70 V AC) so the phone could ring, with a mechanical relay to keep that voltage away from the sound card. It isn't part of the working system yet.
 
 ### The keyboard
 
 The Apple Extended Keyboard speaks Apple Desktop Bus (ADB). An Arduino Uno R3 sits in between and translates ADB to USB. The ADB data line goes to GPIO 8, pulled up to 5 V through a 1 kΩ resistor, and the ATmega328P reads it with microsecond timing.
+
+A stock Uno can't pretend to be a keyboard: its USB side is a separate ATmega16U2 that only knows how to be a serial port. So the 16U2 was reflashed with Atmel FLIP to enumerate as a USB keyboard, while the 328P does the ADB work and maps 1990 key codes to the ones Linux expects.
 <!-- TODO: name and link the ADB-to-USB firmware project this is based on. -->
 
 ### Parts
@@ -221,6 +227,8 @@ It looks and behaves like System 6/7:
 - **Windows:** you can drag them, minimize them and switch between them.
 - **Sticky notes:** you can stick them on the desktop and cut, copy or duplicate them.
 - **Shortcuts:** ⌘K opens a command palette, ⌘N opens a new notepad and ⌘W closes the front window.
+- **Boot sequence:** it starts with a System 7.0.1 boot log ("Finder 7.0", "MacinTalk Pro... OK", "Dialing the wire..."), then "Packet received. System Ready."
+- **Screensaver:** flying toasters, a bouncing Happy Mac and a starfield, running at four frames per second.
 
 The apps are a Calculator, a Notepad, a Messages window, a web browser that forces pages into black and white, and a Terminal. The Terminal is a real Linux shell in a 1-bit window. The Settings control panel holds the font choices and Doom's launch options.
 
@@ -239,6 +247,7 @@ Keeping every pixel black or white took real work, because browsers produce grey
 
 - **Widgets:** the controls come from a library of more than 30 Mac-style widgets (buttons, windows, menus, scroll bars, alerts), each built so it can never produce a grey pixel.
 - **Banned styles:** transparency, semi-transparent colors and rounded corners (which get smoothed edges) are not allowed. Curves are drawn as pixel-exact shapes, and disabled buttons use dither patterns instead of fading out.
+- **No diagonals either.** The browser's "crisp edges" mode for vector graphics only protects horizontal and vertical edges. Any slanted line still gets smoothed, and even straight lines do when the graphic is scaled. So Happy Mac's face is built from nothing but rectangles, with every curve and diagonal drawn as a staircase of small ones.
 - **Automatic checks:** lint rules, a check whenever code is written, and a reviewer afterwards all enforce this, because each catches different mistakes. A script also captures the real screen output and checks it for grey.
 - **Fonts:** text uses the original Mac bitmap fonts (Chicago, Geneva, Monaco). They are converted into a format the canvas can draw pixel by pixel, and into web fonts for text fields, so no letter is ever smoothed.
 
@@ -248,12 +257,13 @@ Keeping every pixel black or white took real work, because browsers produce grey
 - **Startup:** LightDM logs in and starts labwc, a small Wayland compositor. labwc launches Chromium in kiosk mode, pointed at the desktop.
 - **Web server:** Caddy serves the desktop and forwards API calls to the backend.
 - **Backend:** a Python FastAPI service, run by systemd. It handles the games, image dithering, system status, messaging and the wake word.
-- **Voice:** the Google Gemini Live API, with a system prompt that gives Happy Mac his personality.
+- **Voice:** the Google Gemini Live API, with a system prompt that gives Happy Mac his personality. A live session is capped at about ten minutes, so he hands over to a fresh one behind the scenes, waiting for the end of a sentence so he is never cut off mid-word. If nobody has said anything for ten minutes he hangs up himself.
 - **Wake word:** [openWakeWord](https://github.com/dscripka/openWakeWord), running locally on the Pi. PipeWire routes audio between the handset, the Bluetooth speaker and the wake-word listener.
 - **No smoothed text anywhere:** font smoothing is switched off for the whole system, so even native Linux programs render in 1 bit.
 - **Doom:** a 1-bit fork of [Chocolate Doom](https://github.com/chocolate-doom/chocolate-doom) that runs as a native Wayland program. Chromium steps aside while it has the screen.
 - **Health checks:** systemd timers regularly check the display chain (kernel graphics, compositor and Chromium) and the CPU load. They also back up Happy Mac's memories every day.
-- **Remote access:** a Cloudflare Tunnel makes the phone handset reachable without opening any ports.
+- **Remote access:** a Cloudflare Tunnel makes the phone handset reachable without opening any ports. An owner console, built as a Telegram Mini App, lets me check on him from my phone.
+- **Locked down for guest WiFi:** the Mac visits office and guest networks, so everything except SSH and the handset page listens on localhost only.
 - **Setup:** Ansible builds the whole Pi from a fresh SD card.
 
 Much of the software was written with AI coding assistants, mostly Claude Code. The hardware work still needed hands, a multimeter and an oscilloscope.
@@ -262,12 +272,14 @@ Much of the software was written with AI coding assistants, mostly Claude Code. 
 
 - **The capacitors that weren't.** A smell, a flickering picture, long black-screen periods and sudden power cuts all pointed at dying electrolytic capacitors, the classic compact-Mac failure. It turned out to be a runaway render loop pinning one CPU core at 100%. Fixing the bug made every symptom go away. Linux's average CPU figure had hidden it (one core at 100% and the other three at 20% average out to 40%), so the UI now shows per-core load.
 - **Audio is harder than video.** Getting the right fonts took weeks, but stabilizing the audio chain took longer. Competing audio drivers, a carbon microphone, and a USB sound card that can be pulled out mid-demo all made trouble. At one point the wake-word service believed it was listening to a microphone that was delivering near-silence.
+- **The browser turned the microphone down.** That near-silence had a cause. Chromium's automatic gain control reacts to every crackle from the old phone microphone by turning the gain down, and it never turns it back up. Because the sound card is shared, that setting reached the hardware, and after a few conversations the mic sat at a sixteenth of its volume, for every program, and stayed there. Its noise suppression was no better: it took about 17 dB off the carbon mic, which put all speech below the noise gate. All of the browser's audio processing is now switched off, and the wake-word service raises an alarm if it hears thirty seconds of nothing.
+- **A microphone that freezes.** Pull the USB sound card out while it's recording and the recording call never returns and never fails. It just sits there. A watchdog now notices the stall, aborts the audio stream from the outside, and if ten aborts in a row don't help, the service exits and systemd starts a fresh one. From frozen to talking again takes about fourteen seconds. That is deliberately slow, because the hand-soldered phone mic also drops out for five to ten seconds at a time and then recovers on its own.
 - **Cloud APIs change without asking.** Gemini's behavior changed with no visible version bump. Only tests of the running system noticed.
 - **Measure first, connect later.** A mistake on the 12 V rail can kill a Pi 5 instantly. We learned that the hard way.
 
 ## Known issues and next steps
 
-- Occasional USB over-current warnings and flicker under heavy load. The suspect is the level shifter, and a replacement is planned.
+- Occasional USB over-current warnings and flicker under heavy load. The cause isn't pinned down. My best guess is the power path: the Pi 5 draws its peaks from the 1991 analog board's 12 V rail through a small DC-DC module, which probably can't supply them reliably. The interface board's soldering is not perfect either, and there are more candidates. A logging tool now records the 5 V rail and CPU load around every over-current event to narrow it down.
 - The sound card can give an unpleasantly sharp shock when touched, and audio stops when it happens.
 - Galvanic isolation on the audio path, to keep noise from the digital side out of the handset.
 - An I2S DAC instead of the USB sound card, for lower latency.
@@ -278,7 +290,7 @@ Much of the software was written with AI coding assistants, mostly Claude Code. 
 
 ## Code
 
-The source code isn't published yet. It was built for a specific installation and needs cleaning up before it can go public. The most reusable part, the display overlay, is already public in [macintosh-timings](https://github.com/edwardfalk/macintosh-timings).
+The source code isn't published yet. It was built for a specific installation, and the real blocker isn't tidiness but licensing: the bitmap fonts are derived from Apple's originals, the Zork engine reuses Infocom's room descriptions, and the Apple logo is a trademark. Those need to be replaced or resolved before the repository can be opened. The most reusable part, the display overlay, is already public in [macintosh-timings](https://github.com/edwardfalk/macintosh-timings).
 
 ## Credits and inspiration
 
