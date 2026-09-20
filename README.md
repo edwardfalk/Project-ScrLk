@@ -1,6 +1,6 @@
 # Project ScrLk
 
-![Happy Mac playing Zork on the Macintosh's original monochrome CRT, with the Ericofon beside it](images/happy-mac-zork.jpg)
+![Johannes talking to Happy Mac on the Ericofon](images/johannes-surprised-talking-to-happy-mac.png)
 
 The AI-assistant Happy Mac lives in a Macintosh Classic II from 1991. You talk to him through a cobra phone from 1956. Happy Mac controls the apps and games in the simulated OS environment and gives you tips about where to eat lunch. Happy Mac's favorite artists are Floyd-Steinberg.
 
