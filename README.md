@@ -25,7 +25,7 @@ During the first internship in autumn 2025, my classmate [Felix Da Silva Gunnars
 
 ![The first prototype showing a 404 error on the monochrome CRT](images/prototype-404.jpg)
 
-The prototype had grown into something that combined analog electronics from four decades with cloud AI. It deserved to be done properly, so I made it my degree project in spring 2026. The goal was a stable machine that boots straight into Happy Mac and survives a whole demo. The thesis (in Swedish) is here: [Examensarbete-Projekt-ScrLk.pdf](Examensarbete-Projekt-ScrLk.pdf).
+The prototype had grown into something that combined analog electronics from four decades with cloud AI. It deserved to be done properly, so I made it my degree project in spring 2026. The goal was a stable machine that boots straight into Happy Mac and survives a whole demo. The thesis (in Swedish) is here: [Examensarbete-Projekt-ScrLk.pdf](Examensarbete-Projekt-ScrLk.pdf). One correction to it: the thesis says the Classic's case got the Classic II's insides, but it was the other way round, as the Classic II badge on the front shows.
 
 ## Talking to Happy Mac
 
