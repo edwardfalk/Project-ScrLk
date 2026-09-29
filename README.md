@@ -21,13 +21,30 @@ During our electronics engineering studies at Yrgo we were interns at EQ2 in Got
 
 Johannes had actually bought two Macs: a Macintosh Classic that worked, and a Macintosh Classic II that didn't work at all but was much less worn. So the Classic's insides moved into the nicer Classic II case.
 
+<p align="center">
+  <img src="images/two-macs-on-the-workbench.jpg" alt="Two opened compact Macs on a workbench, among loose wires, a multimeter and a blue ESD mat" width="60%">
+</p>
+
+*October 2025: both Macs opened up on the workbench.*
+
 The project was named ScrLk after the Scroll Lock key, a key almost nobody remembers the purpose of. That felt right for a project about giving something forgotten a new job. The AI became Happy Mac, after the smiling icon Susan Kare drew for the original Macintosh.
 
 During the first internship in autumn 2025, my classmate [Felix Da Silva Gunnarsson](https://github.com/gunnarsson901) and I built a working prototype. The original logic board was replaced by a Raspberry Pi 5, and the handset was wired up through a modified USB sound card. At the school presentation the screen went black a minute in, and the games refused to start when it came back. But you could talk to Happy Mac through the cobra phone!
 
-![The first prototype showing a 404 error on the monochrome CRT](images/prototype-404.jpg)
+<p align="center">
+  <img src="images/felix-listening-to-the-prototype.jpg" alt="Felix holding the Ericofon handset to his ear, listening to the prototype Mac on a conference table at EQ2" height="380">
+  <img src="images/prototype-404.jpg" alt="A 404 error on the monochrome CRT" height="380">
+</p>
+
+*Left: Felix listening to Happy Mac at EQ2. Right: a 404 on the monochrome CRT.*
 
 The prototype had grown into something that combined analog electronics from four decades with cloud AI. It deserved to be done properly, so I made it my degree project in spring 2026. The goal was a stable machine that boots straight into Happy Mac and survives a whole demo. The thesis (in Swedish) is here: [Examensarbete-Projekt-ScrLk.pdf](Examensarbete-Projekt-ScrLk.pdf). One correction to it: the thesis says the Classic's case got the Classic II's insides, but it was the other way round, as the Classic II badge on the front shows.
+
+<p align="center">
+  <img src="images/degree-presentation.jpg" alt="Edward at the degree presentation with the Ericofon handset at his ear and a bouquet of flowers in his arm, next to the Mac with a JBL speaker on top" width="45%">
+</p>
+
+*The degree presentation, spring 2026 (note the shirt). The speaker on top of the Mac is the Bluetooth speaker Happy Mac can move his voice to, so the whole room can hear.*
 
 ## Talking to Happy Mac
 
@@ -144,6 +161,22 @@ Every signal was checked on an oscilloscope before the kernel driver was allowed
 
 ![Pixel clock and sync signals from the Pi on a Keysight oscilloscope](images/scope-sync-signals.jpg)
 
+<p align="center">
+  <img src="images/pi-on-breadboard.jpg" alt="A Raspberry Pi with a rainbow ribbon cable to a breadboard, wired into the open Mac next to the CRT's neck" width="48%">
+  <img src="images/pi-desktop-on-the-crt.jpg" alt="The Raspberry Pi desktop's welcome screen on the Mac's CRT, on a cluttered workbench with a multimeter and the Pi beside it" width="48%">
+</p>
+
+*Left: October 2025, the Pi on a breadboard, wired into the Mac. Right: the Raspberry Pi desktop's welcome screen on the Mac's own tube.*
+
+Getting a clean picture took a while.
+
+<p align="center">
+  <img src="images/crt-bring-up-bands.jpg" alt="The CRT showing a Linux desktop whose wallpaper has turned into black and white bands like contour lines" width="48%">
+  <img src="images/crt-bring-up-smoothed-text.jpg" alt="The CRT showing a Linux menu whose smoothed text has broken up into dots" width="48%">
+</p>
+
+*November 2025. Left: the wallpaper's smooth shading came out as bands. The analog board has a single video input, so it sees one bit of each pixel. If that isn't the top bit, a smooth gradient flips it on and off again and again, which draws bands like these; that was probably what happened here. Right: smoothed text fell apart into dots. That's why the finished system never draws a grey pixel.*
+
 ### Connecting the Pi to the analog board
 
 The original logic board talks to the analog board through a 14-position Molex connector. The Pi's 3.3 V GPIO goes through a bidirectional level shifter to meet the analog board's 5 V TTL levels, and a DC-DC converter powers the Pi from the 12 V rail.
@@ -193,6 +226,13 @@ The Ericofon has a carbon microphone, which needs a steady DC bias current to wo
 
 There was almost nothing about the Ericofon's internals online. The circuit documentation came from binders of 1970s and 1980s drawings at Radiomuseet in Gothenburg.
 
+<p align="center">
+  <img src="images/ericofon-ad.jpg" alt="An old ad headed Elegance for eloquence, showing Ericofons in eighteen colors, from North Electric Company of Galion, Ohio" height="400">
+  <img src="images/ericofon-circuit-diagram.jpg" alt="A page headed ERICOFON, Kretsschema, with the phone's circuit diagram" height="400">
+</p>
+
+*Left: an ad from North Electric in Ohio, which made the Ericofon for the American market, in eighteen colors. Right: the Ericofon's circuit diagram, from 1980s Swedish service documentation.*
+
 The sound card had a surprise of its own. The C-Media chip in these cheap dongles has a hardware sidetone: it routes the microphone straight to the output, inside the chip, at +23.8 dB, and it's on by default. So the handset played back whatever the microphone heard, even when the computer was silent, and could squeal if the speaker got close to the mic. Linux never sees that path, so no software could explain it. The mute is now applied on every deploy, and comes back if the dongle is swapped.
 
 Felix also built a ring generator (25 Hz, about 70 V AC) so the phone could ring, with a mechanical relay to keep that voltage away from the sound card. It isn't part of the working system yet.
@@ -203,6 +243,12 @@ The Apple Extended Keyboard speaks Apple Desktop Bus (ADB). An Arduino Uno R3 si
 
 Felix built this bridge. A stock Uno can't pretend to be a keyboard: its USB side is a separate ATmega16U2 chip that only knows how to be a serial port. So he reflashed that chip with Atmel FLIP to make it show up as a USB keyboard, while the 328P does the ADB work and maps the 1990 key codes to the ones Linux expects.
 <!-- TODO: name and link the ADB-to-USB firmware project this is based on. -->
+
+<p align="center">
+  <img src="images/desk-at-eq2.jpg" alt="The Mac on a desk at EQ2 with the Apple Extended Keyboard, a mouse, the Ericofon and a red-and-black joystick" width="45%">
+</p>
+
+*The whole desk at EQ2: the 1990 keyboard, a mouse, the Ericofon and a joystick.*
 
 ### Parts
 
@@ -241,6 +287,10 @@ It looks and behaves like System 6/7:
 - **Screensaver:** flying toasters, a bouncing Happy Mac and a starfield, running at four frames per second.
 
 The apps are a Calculator, a Notepad, a Messages window, a web browser that forces pages into black and white, and a Terminal. The Terminal is a real Linux shell in a 1-bit window. The Settings control panel holds the font choices and Doom's launch options.
+
+![An early version of the desktop as a raw 512×342 screenshot: Happy Mac's face, a Zork window, and a thought bubble showing a mailbox](images/early-desktop-screenshot.png)
+
+*An early version of the desktop, as a screenshot at the tube's native 512×342, shown here at double size. Nearly every pixel is black or white. The exceptions are 120 grey ones in the dotted line above the Zork score, exactly the kind of leak the checks described below now catch.*
 
 A few small widgets live on the desk:
 
@@ -281,6 +331,10 @@ Much of the software was written with AI coding assistants, mostly Claude Code. 
 ## Things that went wrong
 
 - **The capacitors that weren't.** A smell, a flickering picture, long black-screen periods and sudden power cuts all pointed at dying electrolytic capacitors, the classic compact-Mac failure. Before we got around to replacing any, it turned out to be a runaway render loop pinning one CPU core at 100%. Fixing the bug made the flicker, the black screens and the power cuts go away. Linux's average CPU figure had hidden it (one core at 100% and the other three at 20% average out to 40%), so the UI now shows per-core load. The smell remains a mystery. Since the picture was stable again and replacing capacitors carries a real risk of its own, they stayed. Lesson: symptoms don't respect the line between hardware and software.
+
+  <img src="images/looking-for-bad-capacitors.jpg" alt="Close-up of the capacitors and heat sinks on the analog board, under a printed CAUTION label" width="45%">
+
+  *December 2025, hunting for bad capacitors. The real culprit only turned up in March.*
 - **Audio is harder than video.** Getting the right fonts took weeks, but stabilizing the audio chain took longer. Competing audio drivers, a carbon microphone, and a USB sound card that can be pulled out mid-demo all made trouble. At one point the wake-word service believed it was listening to a microphone that was delivering near-silence.
 
   ![Debugging notes: the wake-word service reports that it is listening, but PipeWire shows no stream from the USB microphone](images/wake-word-thinks-its-listening.png)
@@ -290,7 +344,7 @@ Much of the software was written with AI coding assistants, mostly Claude Code. 
 - **A microphone that freezes.** Pull the USB sound card out while it's recording and the recording call never returns and never fails. It just sits there. A watchdog now notices the stall, aborts the audio stream from the outside, and if ten aborts in a row don't help, the service exits and systemd starts a fresh one. From frozen to talking again takes about fourteen seconds. That is deliberately slow, because the hand-soldered phone mic also drops out for five to ten seconds at a time and then recovers on its own.
 - **Cloud APIs change without asking.** Gemini's behavior changed with no visible version bump. Only tests of the running system noticed.
 - **Never say it's stable.** In mid-April I remarked how stable everything had become. Then everything stopped working, and every fix created two new problems. The code had grown chaotic from all the features I'd kept adding, and it took about three weeks before things worked again. Scope creep is dangerous, but oh so fun. The wake word alone, an innocent-looking extra, ate a large share of the whole project's time.
-- **Measure first, connect later.** A mistake on the 12 V rail can kill a Pi 5 instantly. We learned that the hard way.
+- **Measure first, connect later.** A mistake on the 12 V rail can kill a Pi 5 instantly. We learned that the hard way: it cost us at least one Pi.
 
 ## Known issues and next steps
 
