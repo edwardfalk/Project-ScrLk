@@ -18,7 +18,7 @@ The thesis ([Examensarbete-Projekt-ScrLk.pdf](../Examensarbete-Projekt-ScrLk.pdf
 
 ## What has changed since the thesis
 
-- **The two Macs.** The thesis says the Classic's case got the Classic II's insides. It was the other way round: the working Classic's CRT and analog board moved into the less worn Classic II case, which is the badge on the front.
+- **The two Macs.** The thesis describes the prototype from the first internship, which was in the Classic's own case. Later the working Classic's CRT and analog board moved into the less worn Classic II case, which is the badge on the finished machine.
 - **The USB over-current warnings.** The thesis blames an undersized level shifter. The best guess now is the power path: the Pi 5 draws its peaks from the analog board's 12 V rail through a small DC-DC module. See [Known issues](../README.md#known-issues-and-next-steps).
 
 ## The build in pictures
@@ -43,7 +43,7 @@ More photos from the build, beyond the ones in the README, roughly in the order 
   <img src="../images/ericofon-installation-sheet.jpg" alt="Two pages of Swedish Ericofon installation instructions with wiring diagrams" height="360">
 </p>
 
-*Left: October 2025, no going back: the Ericofon's cord cut open. Right: the Ericofon's installation instructions, from the same 1980s Swedish documentation as the circuit diagram in the README.*
+*Left: October 2025, no going back: the Ericofon's cord cut open. Right: the Ericofon's installation instructions, from the same Radiomuseet binders as the circuit diagram in the README.*
 
 <p align="center">
   <img src="../images/crt-bring-up-stripes.jpg" alt="The CRT showing a Linux menu, with thin white stripes across the black areas" width="60%">
