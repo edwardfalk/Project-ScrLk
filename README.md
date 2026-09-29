@@ -4,6 +4,8 @@
 
 The AI-assistant Happy Mac lives in a Macintosh Classic II from 1991. You talk to him through a cobra phone from 1956. Happy Mac controls the apps and games in the simulated OS environment and gives you tips about where to eat lunch. Happy Mac's favorite artists are Floyd-Steinberg.
 
+*Built by [Edward Falk](https://edwardfalk.com) with [Felix Da Silva Gunnarsson](https://github.com/gunnarsson901) during our electronics engineering studies at Yrgo, then turned into my degree project in 2026. Over 700 commits so far, from a bare analog board to a Mac that boots straight into Happy Mac.*
+
 ## What it does
 
 - **Talk to him through the phone.** A Swedish Ericofon (the "cobra phone") is the microphone and speaker. Say "hey jarvis" into the handset to wake him, and he answers through the handset and in writing on the screen, in Swedish or English, whichever you speak. Teaching him to answer to "hey mac" is on the list.
@@ -39,7 +41,7 @@ From there, people find the rest:
 - He remembers your name and the things you care about between conversations.
 - He has his own email address, subscribed to tech newsletters, so he always has the latest tech news to talk about. He also knows the weather and the time, and can look up anything else on the web.
 - For deeper questions he can search Gemini Notebooks (formerly NotebookLM). That runs in the background: he answers right away and weaves in what he finds when the results arrive.
-- He can look at live network traffic from the EQ200L, a passive network tap that is Felix's own degree project, and tell you what's on the wire. He can only watch, never interfere. At the degree presentation he was asked for the tap's latest data, reported it offline, and Felix confirmed from his laptop that it was.
+- He can look at live network traffic from the EQ200L, a passive network tap that is Felix's own degree project, and tell you what's on the wire. He can only watch, never interfere. At the degree presentation he was asked for the tap's latest data, reported it offline instead of making up a reading, and Felix confirmed from his laptop that it really was down.
 - Ask him how he's feeling and you get his CPU temperature and memory use.
 - Say "louder" or "quieter" and he changes his volume. He can also move his voice from the handset to a Bluetooth speaker, so a whole room can listen.
 - You can interrupt him. The microphone stays open while he talks, and if you keep speaking over him he stops mid-sentence and listens. The tricky part was telling your voice apart from his own voice leaking from the earpiece into the handset microphone. The threshold was measured on the real phone.
@@ -60,7 +62,11 @@ Zork I is the classic 1980 text adventure: *"You are standing in an open field w
 
 The remake is the whole game, not a demo. All 110 rooms of Zork I are there, from the forest around the white house to the maze, the dam, the river and the Land of the Dead, with about 60 objects and the original room descriptions. The troll guards his room, the cyclops blocks the way, the bat carries you off, and the thief wanders the dungeon and steals from you. Treasures go in the trophy case for points, the lantern runs down if you keep it lit, and you can save and restore. It started as a separate project in November 2025: a Python remake, modelled on the architecture of [ZorkAI](https://github.com/arsindelve/ZorkAI) and built room by room over a weekend. In March 2026 I ported it to TypeScript and moved it into the Mac, where the backend runs it as a small background process and talks to it one command at a time.
 
-The best part is that he imagines where you are. The first time you walk into a room, a thought bubble pops up beside Happy Mac's face, with a trail of little circles leading back to him, and he might say something like "I can almost picture it…". While he thinks, the bubble reads DREAMING…. Ten to thirty seconds later the scene appears inside it: a small 128×128-pixel picture, painted by Google's image model in the style of a HyperCard ink drawing. It is then dithered to pure black and white with Atkinson dithering, the method Bill Atkinson came up with at Apple for the original Macintosh. He never mentions generating or loading anything; he is just imagining. The photo at the top of this page shows it: that's the white house in his thought bubble.
+The best part is that he imagines where you are. The first time you walk into a room, a thought bubble pops up beside Happy Mac's face, with a trail of little circles leading back to him, and he might say something like "I can almost picture it…". While he thinks, the bubble reads DREAMING…. Ten to thirty seconds later the scene appears inside it: a small 128×128-pixel picture, painted by Google's image model in the style of a HyperCard ink drawing. It is then dithered to pure black and white with Atkinson dithering, the method Bill Atkinson came up with at Apple for the original Macintosh. He never mentions generating or loading anything; he is just imagining.
+
+![Happy Mac playing Zork on the CRT, with the white house in his thought bubble and the Ericofon beside the Mac](images/happy-mac-zork.jpg)
+
+*The first room of Zork, with the white house in Happy Mac's thought bubble.*
 
 The pictures belong to the places. Walk back into a room and he remembers what it looked like. But if something visibly changes it, like lighting the lamp, opening the grating or killing the troll, he imagines the room again. Start a new game and every room gets new art.
 
@@ -274,11 +280,16 @@ Much of the software was written with AI coding assistants, mostly Claude Code. 
 
 ## Things that went wrong
 
-- **The capacitors that weren't.** A smell, a flickering picture, long black-screen periods and sudden power cuts all pointed at dying electrolytic capacitors, the classic compact-Mac failure. It turned out to be a runaway render loop pinning one CPU core at 100%. Fixing the bug made every symptom go away. Linux's average CPU figure had hidden it (one core at 100% and the other three at 20% average out to 40%), so the UI now shows per-core load.
+- **The capacitors that weren't.** A smell, a flickering picture, long black-screen periods and sudden power cuts all pointed at dying electrolytic capacitors, the classic compact-Mac failure. Before we got around to replacing any, it turned out to be a runaway render loop pinning one CPU core at 100%. Fixing the bug made the flicker, the black screens and the power cuts go away. Linux's average CPU figure had hidden it (one core at 100% and the other three at 20% average out to 40%), so the UI now shows per-core load. The smell remains a mystery. Since the picture was stable again and replacing capacitors carries a real risk of its own, they stayed. Lesson: symptoms don't respect the line between hardware and software.
 - **Audio is harder than video.** Getting the right fonts took weeks, but stabilizing the audio chain took longer. Competing audio drivers, a carbon microphone, and a USB sound card that can be pulled out mid-demo all made trouble. At one point the wake-word service believed it was listening to a microphone that was delivering near-silence.
+
+  ![Debugging notes: the wake-word service reports that it is listening, but PipeWire shows no stream from the USB microphone](images/wake-word-thinks-its-listening.png)
+
+  *From the debugging notes. Johannes's best "hey jarvis" peaked at a confidence of 0.484, just under the 0.50 threshold, while the service insisted it was listening.*
 - **The browser turned the microphone down.** That near-silence had a cause. Chromium's automatic gain control reacts to every crackle from the old phone microphone by turning the gain down, and it never turns it back up. Because the sound card is shared, that setting reached the hardware, and after a few conversations the mic sat at a sixteenth of its volume, for every program, and stayed there. Its noise suppression was no better: it took about 17 dB off the carbon mic, which put all speech below the noise gate. All of the browser's audio processing is now switched off, and the wake-word service raises an alarm if it hears thirty seconds of nothing.
 - **A microphone that freezes.** Pull the USB sound card out while it's recording and the recording call never returns and never fails. It just sits there. A watchdog now notices the stall, aborts the audio stream from the outside, and if ten aborts in a row don't help, the service exits and systemd starts a fresh one. From frozen to talking again takes about fourteen seconds. That is deliberately slow, because the hand-soldered phone mic also drops out for five to ten seconds at a time and then recovers on its own.
 - **Cloud APIs change without asking.** Gemini's behavior changed with no visible version bump. Only tests of the running system noticed.
+- **Never say it's stable.** In mid-April I remarked how stable everything had become. Then everything stopped working, and every fix created two new problems. The code had grown chaotic from all the features I'd kept adding, and it took about three weeks before things worked again. Scope creep is dangerous, but oh so fun. The wake word alone, an innocent-looking extra, ate a large share of the whole project's time.
 - **Measure first, connect later.** A mistake on the 12 V rail can kill a Pi 5 instantly. We learned that the hard way.
 
 ## Known issues and next steps
@@ -294,7 +305,7 @@ Much of the software was written with AI coding assistants, mostly Claude Code. 
 
 ## Code
 
-The source code isn't published yet. It was built for a specific installation, and the real blocker isn't tidiness but licensing: the bitmap fonts are derived from Apple's originals, the Zork engine reuses Infocom's room descriptions, and the Apple logo is a trademark. Those need to be replaced or resolved before the repository can be opened. The most reusable part, the display overlay, is already public in [macintosh-timings](https://github.com/edwardfalk/macintosh-timings).
+The source code isn't published yet. It was built for a specific installation, and the real blocker isn't tidiness but licensing: the bitmap fonts are derived from Apple's originals, the Zork engine reuses Infocom's room descriptions, and the Apple logo is a trademark. Those need to be replaced or resolved before the repository can be opened. The most reusable part, the display overlay, is already public in [macintosh-timings](https://github.com/edwardfalk/macintosh-timings). If you'd like to see the rest, [get in touch](https://edwardfalk.com) and I'll gladly walk you through it.
 
 ## Credits and inspiration
 
