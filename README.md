@@ -219,7 +219,7 @@ Whatever source you use, **measure your own board before connecting anything.** 
 
 The first version powered the Pi from the Mac itself: the LM2596 DC-DC module on the interface board turned the analog board's 12 V rail into 5 V. It mostly worked. But a Pi 5 with USB devices attached wants up to 5 A at 5 V, and a small module running off a decades-old analog board couldn't deliver the peaks. When the supply sagged, the Pi protected itself by cutting power to its USB ports, the log filled with USB over-current warnings, and the handset's sound card vanished mid-conversation.
 
-Felix and I had already presented a much simpler version as our LIA project, and it only worked half the time. For the degree presentation I wanted the machine as close to 100 % stable as I could get, so I replaced the converter with a dedicated 5 A USB-PD power supply inside the case. The Pi now negotiates its full 5 A, and the over-current warnings are gone.
+Felix and I had already presented a much simpler version as our LIA project, and it only worked half the time. For the degree presentation I wanted the machine as close to 100 % stable as I could get. After trying a few power supplies on the bench with the case open, I put the final setup together just before the presentation: a dedicated 5 A USB-PD power supply, mounted inside the case in place of the converter. In the same weeks I also re-soldered and re-wired parts of the build, which probably helped too. The Pi now negotiates its full 5 A, and the over-current warnings are gone.
 
 ### The Ericofon
 
