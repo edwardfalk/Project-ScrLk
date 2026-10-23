@@ -188,6 +188,9 @@ The original logic board talks to the analog board through a 14-position Molex c
 
 *The interface board. A GPIO extension board takes the Pi's ribbon cable, and the 12 V to 5 V converter (an LM2596 module) sits in a 3D-printed holder. Underneath it, a 4-channel level shifter translates between 3.3 V and 5 V.*
 
+> [!WARNING]
+> **This table is probably wrong. Don't wire anything from it.** It is the table printed in the thesis, and it disagrees with Apple's own pinout for the Macintosh Classic's logic-board connector, J12 ([Tech Info Library article 6532](https://savagetaylor.com/TIL/TIL06532.pdf), an archived copy). Apple puts −12 V on pin 8, where this table has video, and +5 V and the two sync signals on pins 2–5. The finished machine works, so its wires go to the right pins; the mistake is in this table. It will be replaced with a pinout measured on our board.
+
 | Pin | Signal | Direction | Notes |
 | --- | --- | --- | --- |
 | 1 | +12 V | from analog board | Feeds the DC-DC converter |
@@ -205,7 +208,7 @@ The original logic board talks to the analog board through a 14-position Molex c
 | 13 | reserved | | |
 | 14 | reserved | | |
 
-This pinout started from public schematics for the Macintosh family and was confirmed by measuring our own board. **Measure yours before connecting anything.** The pins sit close together, and a short between pin 1 (+12 V) and pin 8 (video) would kill the Pi's GPIO instantly.
+Whatever source you use, **measure your own board before connecting anything.** The pins sit close together, and a supply pin shorted to a signal line can kill the Pi's GPIO instantly.
 
 <p align="center">
   <img src="images/terminal-blocks.jpg" alt="Coloured wires from the analog board joined to the interface board's wires in white screw terminal blocks" width="60%">
