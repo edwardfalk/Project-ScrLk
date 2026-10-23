@@ -20,7 +20,7 @@ The thesis ([Examensarbete-Projekt-ScrLk.pdf](../Examensarbete-Projekt-ScrLk.pdf
 
 - **The two Macs.** The thesis describes the prototype from the first internship, which was in the Classic's own case. Later the working Classic's CRT and analog board moved into the less worn Classic II case, which is the badge on the finished machine.
 - **The connector pinout.** The thesis's table of the 14-pin connector, repeated in the README, is probably wrong: it disagrees with Apple's documented pinout for the Classic's J12 connector ([Tech Info Library article 6532](https://savagetaylor.com/TIL/TIL06532.pdf)). Don't wire from it. See the warning in the README.
-- **The USB over-current warnings.** The thesis blames an undersized level shifter. The best guess now is the power path: the Pi 5 draws its peaks from the analog board's 12 V rail through a small DC-DC module. See [Known issues](../README.md#known-issues-and-next-steps).
+- **The power supply and the USB over-current warnings.** The thesis describes the Pi powered from the analog board's 12 V rail through a small DC-DC module, and blames the USB over-current warnings on an undersized level shifter. The power path was the real culprit: before the degree presentation the Pi got its own 5 A USB-PD supply inside the case, and the warnings stopped. See [Powering the Pi](../README.md#powering-the-pi).
 
 ## The build in pictures
 

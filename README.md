@@ -103,19 +103,18 @@ A two-player brawler I made for the Mac desktop. Both players share the keyboard
 
 ![Happy Mac on the CRT, waiting for voice input](images/happy-mac-listening.jpg)
 
-The Macintosh keeps its case, CRT and analog board, which does the power supply, the 15 kV for the tube and the deflection. Only the digital logic board is gone. In its place, a Raspberry Pi 5 generates the video and sync signals that the original logic board used to send.
+The Macintosh keeps its case, CRT and analog board, which runs the tube: its supply voltages, the 15 kV and the deflection. Only the digital logic board is gone. In its place, a Raspberry Pi 5 with a power supply of its own generates the video and sync signals that the original logic board used to send.
 
 ```mermaid
 flowchart LR
     subgraph mac["Macintosh Classic II case"]
         crt["9-inch CRT"]
         ab["Analog board<br/>power, deflection, 15 kV"]
-        dcdc["DC-DC<br/>12 V to 5 V"]
+        psu["USB-PD power supply<br/>5 V, 5 A"]
         pi["Raspberry Pi 5"]
         ls["Level shifter<br/>3.3 V / 5 V"]
         ab --- crt
-        ab -->|"+12 V"| dcdc
-        dcdc -->|"5 V"| pi
+        psu -->|"5 V"| pi
         pi -->|"DPI: video, HSYNC, VSYNC"| ls
         ls -->|"Molex 14-pin"| ab
     end
@@ -179,21 +178,21 @@ Getting a clean picture took a while.
 
 ### Connecting the Pi to the analog board
 
-The original logic board talks to the analog board through a 14-position Molex connector. The Pi's 3.3 V GPIO goes through a bidirectional level shifter to meet the analog board's 5 V TTL levels, and a DC-DC converter powers the Pi from the 12 V rail.
+The original logic board talks to the analog board through a 14-position Molex connector. The Pi's 3.3 V GPIO goes through a bidirectional level shifter to meet the analog board's 5 V TTL levels.
 
 <p align="center">
   <img src="images/interface-board.jpg" alt="The interface board: a red GPIO extension board on perfboard, with a blue DC-DC converter module in a black 3D-printed holder" width="48%">
   <img src="images/level-shifter.jpg" alt="Side view of the interface board, showing a small blue 4-channel level shifter under the converter" width="48%">
 </p>
 
-*The interface board. A GPIO extension board takes the Pi's ribbon cable, and the 12 V to 5 V converter (an LM2596 module) sits in a 3D-printed holder. Underneath it, a 4-channel level shifter translates between 3.3 V and 5 V.*
+*The interface board. A GPIO extension board takes the Pi's ribbon cable, and the first version's 12 V to 5 V converter (an LM2596 module, since replaced: see [Powering the Pi](#powering-the-pi)) sits in a 3D-printed holder. Underneath it, a 4-channel level shifter translates between 3.3 V and 5 V.*
 
 > [!WARNING]
 > **This table is probably wrong. Don't wire anything from it.** It is the table printed in the thesis, and it disagrees with Apple's own pinout for the Macintosh Classic's logic-board connector, J12 ([Tech Info Library article 6532](https://savagetaylor.com/TIL/TIL06532.pdf), an archived copy). Apple puts −12 V on pin 8, where this table has video, and +5 V and the two sync signals on pins 2–5. The finished machine works, so its wires go to the right pins; the mistake is in this table. It will be replaced with a pinout measured on our board.
 
 | Pin | Signal | Direction | Notes |
 | --- | --- | --- | --- |
-| 1 | +12 V | from analog board | Feeds the DC-DC converter |
+| 1 | +12 V | from analog board | Fed the first version's DC-DC converter |
 | 2 | +12 V GND | | |
 | 3 | −12 V | from analog board | |
 | 4 | +5 V | from analog board | |
@@ -215,6 +214,12 @@ Whatever source you use, **measure your own board before connecting anything.** 
 </p>
 
 *Inside the case, screw terminals join the wires from the analog board to the interface board.*
+
+### Powering the Pi
+
+The first version powered the Pi from the Mac itself: the LM2596 DC-DC module on the interface board turned the analog board's 12 V rail into 5 V. It mostly worked. But a Pi 5 with USB devices attached wants up to 5 A at 5 V, and a small module running off a decades-old analog board couldn't deliver the peaks. When the supply sagged, the Pi protected itself by cutting power to its USB ports, the log filled with USB over-current warnings, and the handset's sound card vanished mid-conversation.
+
+Felix and I had already presented a much simpler version as our LIA project, and it only worked half the time. For the degree presentation I wanted the machine as close to 100 % stable as I could get, so I replaced the converter with a dedicated 5 A USB-PD power supply inside the case. The Pi now negotiates its full 5 A, and the over-current warnings are gone.
 
 ### The Ericofon
 
@@ -265,7 +270,8 @@ Felix built this bridge. A stock Uno can't pretend to be a keyboard: its USB sid
 | USB sound card | Audio in and out | 150 kr |
 | GPIO extension board + perfboard | Interface board | |
 | Level shifter, 4-channel, 3.3 V / 5 V | GPIO to analog board | 100 kr |
-| DC-DC converter, 12 V to 5 V (LM2596 module) | Powers the Pi | 100 kr |
+| DC-DC converter, 12 V to 5 V (LM2596 module) | Powered the Pi in the first version | 100 kr |
+| USB-C power supply, 5 V 5 A (USB-PD) | Powers the Pi | |
 | Arduino Uno R3 | ADB-to-USB bridge | 250 kr |
 | Apple Extended Keyboard | Input | secondhand |
 | 1 kΩ resistor | ADB data pull-up | < 10 kr |
@@ -351,7 +357,6 @@ Much of the software was written with AI coding assistants, mostly Claude Code. 
 
 ## Known issues and next steps
 
-- Occasional USB over-current warnings and flicker under heavy load. The cause isn't pinned down. My best guess is the power path: the Pi 5 draws its peaks from the 1991 analog board's 12 V rail through a small DC-DC module, which probably can't supply them reliably. The interface board's soldering is not perfect either, and there are more candidates. A logging tool now records the 5 V rail and CPU load around every over-current event to narrow it down.
 - The sound card can give an unpleasantly sharp shock when touched, and audio stops when it happens.
 - Galvanic isolation on the audio path, to keep noise from the digital side out of the handset.
 - An I2S DAC instead of the USB sound card, for lower latency.
